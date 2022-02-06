@@ -19,6 +19,8 @@ interface LendingPool {
 contract Aio {
     address public asset;
     uint256 public amount;
+    address public depositer;
+    mapping(address => uint256) bal;
     LendingPoolAddressesProvider provider =
         LendingPoolAddressesProvider(
             0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9
@@ -34,8 +36,10 @@ contract Aio {
         // provider = LendingPoolAddressesProvider(_provider);
     }
 
-    function deposit() external {
+    function deposit() external returns (uint256) {
         lp = LendingPool(provider.getLendingPool());
+        bal[depositer] -= amount;
         lp.deposit(asset, amount, msg.sender, 0);
+        return bal[msg.sender];
     }
 }
