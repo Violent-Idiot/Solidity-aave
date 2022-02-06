@@ -19,6 +19,7 @@ describe("Aio Contract", function () {
   describe("Deployment", () => {
     it("Check deposit", async function () {
       await aioToken.depositETH({
+        from: depositer,
         value: ethers.utils.parseEther("1"),
       });
       const deposit = await aioToken.deposit();
