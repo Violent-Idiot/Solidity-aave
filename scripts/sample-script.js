@@ -15,9 +15,11 @@ async function main() {
 
   // We get the contract to deploy
   const Aio = await hre.ethers.getContractFactory("Aio");
-  // const greeter = await Greeter.deploy("Hello, Hardhat!");
+  const AioDeploy = await Aio.deploy(
+    "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+  );
 
-  await Aio.deployed();
+  await AioDeploy.deployed();
 
   // console.log("Greeter deployed to:", greeter.address);
 }
