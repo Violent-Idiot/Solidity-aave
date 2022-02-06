@@ -1,28 +1,44 @@
 //SPDX-License-Identifier: Unlicense
-pragma solidity 0.6.12;
+pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
 
-import "@aave/protocol-v2/contracts/protocol/lendingpool/LendingPool.sol";
-import "@aave/protocol-v2/contracts/protocol/configuration/LendingPoolAddressesProvider.sol";
+// import "@aave/protocol-v2/contracts/protocol/lendingpool/LendingPool.sol";
+// import "@aave/protocol-v2/contracts/protocol/configuration/LendingPoolAddressesProvider.sol";
+
+interface LendingPoolAddressesProvider {
+    function getLendingPool() external returns (address);
+}
+
+interface LendingPool {
+    function deposit(
+        address asset,
+        uint256 amount,
+        address onBehalfOf,
+        uint16 referralCode
+    ) external;
+}
 
 contract Aio {
-    LendingPoolAddressesProvider provider;
-    uint256 public amount;
     address public asset;
+    uint256 public amount;
+    LendingPoolAddressesProvider provider =
+        LendingPoolAddressesProvider(
+            0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9
+        );
+    LendingPool lp = LendingPool(0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9);
 
     constructor(
-        uint8 _amount,
-        address _asset,
-        address _provider
-    ) public {
+        uint256 _amount,
+        address _asset // address _provider
+    ) {
         amount = _amount;
-        _asset = asset;
-        provider = LendingPoolAddressesProvider(_provider);
+        asset = _asset;
+        // provider = LendingPoolAddressesProvider(_provider);
     }
 
     function deposit() external {
-        LendingPool lp = LendingPool(provider.getLendingPool());
+        lp = LendingPool(provider.getLendingPool());
         lp.deposit(asset, amount, msg.sender, 0);
     }
 }
