@@ -14,14 +14,13 @@ async function main() {
   // await hre.run('compile');
 
   // We get the contract to deploy
-  const Aio = await hre.ethers.getContractFactory("Aio");
-  const AioDeploy = await Aio.deploy(
-    "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
-  );
+  const Aio = await hre.ethers.getContractFactory("Aave");
+  const AioDeploy = await Aio.deploy();
+  // "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
 
   await AioDeploy.deployed();
 
-  // console.log("Greeter deployed to:", greeter.address);
+  console.log("Greeter deployed to:", AioDeploy.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
