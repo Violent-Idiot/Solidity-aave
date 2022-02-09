@@ -123,7 +123,5 @@ contract Aave {
         console.log("After Payback", token.balanceOf(address(this)));
     }
 
-    fallback() external payable {
-        // console.log("Hey Brotha");
-    }
+    fallback() external payable {}
 }
