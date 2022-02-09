@@ -19,10 +19,40 @@ describe("Aio Contract", function () {
     it("Check deposit", async function () {
       const [owner] = await ethers.getSigners();
       console.log(owner.address);
-      // console.log(ethers.utils.parseUnits("1", "wei"));
-      await aioToken.deposit(1, {
+      // console.log(ethers.utils.parseEther("1"));
+      await aioToken.deposit({
         from: owner.address,
-        value: ethers.utils.parseUnits("1", "wei"),
+        value: ethers.utils.parseEther("1"),
+      });
+    }).timeout(500000);
+
+    it("Check Withdraw", async function () {
+      const [owner] = await ethers.getSigners();
+      console.log(owner.address);
+      // console.log(ethers.utils.parseEther("1"));
+      await aioToken.withdraw({
+        from: owner.address,
+        value: ethers.utils.parseEther("1"),
+      });
+    }).timeout(500000);
+    it("Check Borrow", async function () {
+      const [owner] = await ethers.getSigners();
+      console.log(owner.address);
+      await aioToken.deposit({
+        from: owner.address,
+        value: ethers.utils.parseEther("1"),
+      });
+      await aioToken.borrow({
+        from: owner.address,
+        value: ethers.utils.parseEther("0.5"),
+      });
+    }).timeout(500000);
+    it("Check Payback", async function () {
+      const [owner] = await ethers.getSigners();
+      console.log(owner.address);
+      await aioToken.payback({
+        from: owner.address,
+        value: ethers.utils.parseEther("0.5"),
       });
     }).timeout(500000);
   });
