@@ -52,6 +52,7 @@ interface LendingPoolAddressesProvider {
 contract Aave {
     // address constant weth = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2; //MAINNET
     address weth = 0xd0A1E359811322d97991E03f863a0C30C2cF029C; //KOVAN
+    address eth = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     LendingPoolAddressesProvider provider =
         LendingPoolAddressesProvider(
@@ -79,7 +80,8 @@ contract Aave {
 
     function deposit(address tokenaddr) external payable {
         // address tokenaddr = weth;
-        bool isEth = (tokenaddr == weth) ? true : false;
+        bool isEth = (tokenaddr == eth) ? true : false;
+        tokenaddr = (isEth) ? weth : tokenaddr;
         uint256 amt = msg.value;
         Itoken token = Itoken(tokenaddr);
         IAave aave = IAave(provider.getLendingPool());
