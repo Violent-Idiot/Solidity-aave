@@ -5,6 +5,7 @@
 // Runtime Environment's members available in the global scope.
 const hre = require("hardhat");
 
+const { network } = require("hardhat");
 async function main() {
   // Hardhat always runs the compile task when running scripts with its command
   // line interface.
@@ -19,6 +20,10 @@ async function main() {
   // "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
 
   await AioDeploy.deployed();
+  // await network.provider.request({
+  //   method: "hardhat_impersonateAccount",
+  //   params: ["0x15BB5127Bd75025AaCe941bC7296fCEEF46980b1"],
+  // });
 
   console.log("Greeter deployed to:", AioDeploy.address);
 }

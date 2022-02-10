@@ -9,7 +9,12 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
     console.log(account.address);
   }
 });
-
+// (async function () {
+//   await network.provider.request({
+//     method: "hardhat_impersonateAccount",
+//     params: ["0x15BB5127Bd75025AaCe941bC7296fCEEF46980b1"],
+//   });
+// })();
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
 
@@ -22,9 +27,7 @@ module.exports = {
     hardhat: {
       forking: {
         url: process.env.INFURA,
-        // accounts: [
-        //   `0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80`,
-        // ],
+        // accounts: [process.env.SECRET_KEY],
       },
     },
   },
