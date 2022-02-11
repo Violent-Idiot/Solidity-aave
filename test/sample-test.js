@@ -15,20 +15,22 @@ describe("Aio Contract", function () {
       // const [owner] = await ethers.getSigners();
       // console.log(owner.address);
       // console.log(ethers.utils.parseEther("1"));
+      const token = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
       const acc = "0x15BB5127Bd75025AaCe941bC7296fCEEF46980b1";
       await hre.network.provider.request({
         method: "hardhat_impersonateAccount",
         params: ["0x15BB5127Bd75025AaCe941bC7296fCEEF46980b1"],
       });
       // console.log(addr);
-      const [owner] = await ethers.getSigners(
+      const owner = await ethers.getSigner(
         "0x15BB5127Bd75025AaCe941bC7296fCEEF46980b1"
       );
       console.log(owner.address);
-      await aioToken.deposit("0x4f96fe3b7a6cf9725f59d353f723c1bdb64ca6aa", {
+      await aioToken.deposit(token, {
         from: owner.address,
         // from: acc,
-        value: ethers.utils.parseEther("1"),
+        // value: ethers.utils.parseEther("1"),
+        value: ethers.utils.parseUnits("1", 0),
       });
     }).timeout(500000);
 
