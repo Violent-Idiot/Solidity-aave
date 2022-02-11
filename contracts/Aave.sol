@@ -2,6 +2,8 @@
 pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 interface IAave {
     function deposit(
@@ -51,6 +53,8 @@ interface LendingPoolAddressesProvider {
 
 contract Aave {
     // address constant weth = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2; //MAINNET
+    using SafeERC20 for IERC20;
+
     address weth = 0xd0A1E359811322d97991E03f863a0C30C2cF029C; //KOVAN
     address eth = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
@@ -78,21 +82,37 @@ contract Aave {
         token.withdraw(amt);
     }
 
-    function deposit(address tokenaddr) external payable {
-        // address tokenaddr = weth;
-        bool isEth = (tokenaddr == eth) ? true : false;
-        tokenaddr = (isEth) ? weth : tokenaddr;
+    function ERCdeposit(address tokenaddr, uint256 amt) external payable {
+        console.log(address(this));
+        IAave aave = IAave(provider.getLendingPool());
+        IERC20 token = IERC20(tokenaddr);
+        require(token.balanceOf(msg.sender) >= amt, "Insufficent funds");
+        console.log(token.balanceOf(msg.sender) / (10**18));
+        console.log(msg.sender);
+        token.approve(address(this), amt);
+        // token.allowance(msg.sender, address(this));
+        token.transferFrom(msg.sender, address(this), amt);
+        token.approve(address(aave), amt);
+        aave.deposit(address(tokenaddr), amt, address(this), 0);
+    }
+
+    function deposit() external payable {
+        address tokenaddr = weth;
+        console.log("here");
+        // bool isEth = (tokenaddr == eth) ? true : false;
+        // tokenaddr = (isEth) ? weth : tokenaddr;
         uint256 amt = msg.value;
         Itoken token = Itoken(tokenaddr);
         IAave aave = IAave(provider.getLendingPool());
         console.log("ETH bal of sender", msg.sender.balance);
         console.log("ETH bal of contact", address(this).balance);
         console.log("Before deposit to weth", token.balanceOf(address(this)));
-        if (isEth) {
-            _ethToWeth(token, amt, address(aave));
-        }
+        // if (isEth) {
+        _ethToWeth(token, amt, address(aave));
+        // }
         console.log("After deposit to weth", token.balanceOf(address(this)));
         aave.deposit(tokenaddr, amt, address(this), 0);
+        // aave.deposit(tokenaddr, amt, msg.sender, 0);
         console.log("After deposit to aave", token.balanceOf(address(this)));
         console.log("ETH bal", msg.sender.balance);
     }
