@@ -92,14 +92,16 @@ contract Aave {
 
     function ERCdeposit(address tokenaddr, uint256 amt) external payable {
         console.log(address(this));
-        IAave aave = IAave(provider.getLendingPool());
-        IERC20 token = IERC20(tokenaddr);
-        require(token.balanceOf(msg.sender) >= amt, "Insufficent funds");
-        console.log(token.balanceOf(msg.sender));
         console.log(msg.sender);
-        token.approve(address(this), amt);
-        console.log(token.allowance(msg.sender, address(this)));
-        token.transfer(address(this), amt);
+        IAave aave = IAave(provider.getLendingPool());
+        Itoken token = Itoken(tokenaddr);
+        require(token.balanceOf(msg.sender) >= amt, "Insufficent funds");
+        // console.log(token.balanceOf(msg.sender));
+        // console.log(msg.sender);
+        // // token.approve(address(this), amt);
+        // console.log("Allowance", token.allowance(msg.sender, address(this)));
+        token.transferFrom(msg.sender, address(this), amt);
+        // token.transfer(address(this), amt);
         console.log(token.balanceOf(address(this)));
         token.approve(address(aave), amt);
         console.log("here1");

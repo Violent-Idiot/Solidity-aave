@@ -38,9 +38,12 @@ describe("Aio Contract", function () {
       );
       // const
       console.log(bal, contractAddr.address);
+      // daiContract
+      //   .transfer(contractAddr.address, ethers.utils.parseUnits("1", 0))
+      //   // .then((res) => console.log(res))
+      //   .catch((err) => console.log(err));
       daiContract
-        .transfer(contractAddr.address, ethers.utils.parseUnits("1", 0))
-        // .then((res) => console.log(res))
+        .approve(contractAddr.address, 1)
         .catch((err) => console.log(err));
       // console.log(owner.address, ethers.utils.parseUnits("1", 0));
       // daiContract.
@@ -51,7 +54,7 @@ describe("Aio Contract", function () {
       // daiContract
       //   .approve(contractAddr.address, ethers.utils.parseUnits("1", 0))
       //   .catch((err) => console.log(err));
-      const amt = ethers.utils.parseUnits("1", 0);
+      // const amt = ethers.utils.parseUnits("1", 0);
       // daiContract.methods
       //   .approve(token, amt)
       //   .send({ from: signer.address }, (err, tx) => {
@@ -60,13 +63,10 @@ describe("Aio Contract", function () {
       //   });
       // .then((res) => console.log(res))
       // .catch((err) => console.log(err));
-      await aioToken.connect(owner).ERCdeposit(token, 1, {
-        // from: owner.address,
-        // value: ethers.utils.parseUnits("1", 0),
-      });
+      await aioToken.connect(owner).ERCdeposit(token, 1);
       // console.log(first)
-      bal = await daiContract.balanceOf(signer.address);
-      console.log(bal);
+      // bal = await daiContract.balanceOf(signer.address);
+      // console.log(bal);
     }).timeout(500000);
     it("Check deposit", async function () {
       const token = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
