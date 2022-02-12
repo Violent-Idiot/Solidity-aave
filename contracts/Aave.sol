@@ -40,11 +40,19 @@ interface Itoken {
 
     function transfer(address, uint256) external;
 
+    function transferFrom(
+        address,
+        address,
+        uint256
+    ) external;
+
     function deposit() external payable;
 
     function withdraw(uint256) external;
 
     function balanceOf(address) external view returns (uint256);
+
+    function decimals() external view returns (uint256);
 }
 
 interface LendingPoolAddressesProvider {
@@ -87,29 +95,44 @@ contract Aave {
         IAave aave = IAave(provider.getLendingPool());
         IERC20 token = IERC20(tokenaddr);
         require(token.balanceOf(msg.sender) >= amt, "Insufficent funds");
-        console.log(token.balanceOf(msg.sender) / (10**18));
+        console.log(token.balanceOf(msg.sender));
         console.log(msg.sender);
         token.approve(address(this), amt);
-        // token.allowance(msg.sender, address(this));
-        token.transferFrom(msg.sender, address(this), amt);
+        console.log(token.allowance(msg.sender, address(this)));
+        token.transfer(address(this), amt);
+        console.log(token.balanceOf(address(this)));
         token.approve(address(aave), amt);
-        aave.deposit(address(tokenaddr), amt, address(this), 0);
+        console.log("here1");
+        aave.deposit(tokenaddr, amt, address(this), 0);
+        console.log("here2");
     }
 
-    function deposit() external payable {
-        address tokenaddr = weth;
-        console.log("here");
-        // bool isEth = (tokenaddr == eth) ? true : false;
-        // tokenaddr = (isEth) ? weth : tokenaddr;
-        uint256 amt = msg.value;
+    function deposit(address tokenaddr, uint256 amt) external payable {
+        // address tokenaddr = weth;
+        console.log(tokenaddr);
+        bool isEth = (tokenaddr == eth) ? true : false;
+        tokenaddr = (isEth) ? weth : tokenaddr;
+        amt = (isEth) ? msg.value : amt;
+        // address token;
+        // uint256 amt = msg.value;
+        // if (isEth) {
         Itoken token = Itoken(tokenaddr);
+        // } else {
+        //     token = IERC20(tokenaddr);
+        // }
         IAave aave = IAave(provider.getLendingPool());
         console.log("ETH bal of sender", msg.sender.balance);
         console.log("ETH bal of contact", address(this).balance);
         console.log("Before deposit to weth", token.balanceOf(address(this)));
-        // if (isEth) {
-        _ethToWeth(token, amt, address(aave));
-        // }
+        if (isEth) {
+            _ethToWeth(token, amt, address(aave));
+        } else {
+            token.approve(address(this), amt);
+            // console.log(token.allowance(msg.sender, address(this)));
+            token.transfer(address(this), amt);
+            console.log(token.balanceOf(address(this)));
+            token.approve(address(aave), amt);
+        }
         console.log("After deposit to weth", token.balanceOf(address(this)));
         aave.deposit(tokenaddr, amt, address(this), 0);
         // aave.deposit(tokenaddr, amt, msg.sender, 0);
