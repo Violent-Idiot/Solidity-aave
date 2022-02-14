@@ -36,11 +36,11 @@ task("demo", "give details of acc", async (taskArgs, hre) => {
  */
 module.exports = {
   solidity: "0.8.4",
+  // defaultNetwork: "hardhat",
   networks: {
     hardhat: {
       forking: {
-        url: process.env.INFURA,
-        accounts: [process.env.SECRET_KEY],
+        url: process.env.ALCHEMY,
       },
     },
     // kovan: {
