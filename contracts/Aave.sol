@@ -60,16 +60,17 @@ interface LendingPoolAddressesProvider {
 }
 
 contract Aave {
-    // address constant weth = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2; //MAINNET
     using SafeERC20 for IERC20;
 
-    address weth = 0xd0A1E359811322d97991E03f863a0C30C2cF029C; //KOVAN
+    address weth = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2; //MAINNET
+    address aWeth = 0x030bA81f1c18d280636F32af80b9AAd02Cf0854e;
+    // address weth = 0xd0A1E359811322d97991E03f863a0C30C2cF029C; //KOVAN
     address eth = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
     LendingPoolAddressesProvider provider =
         LendingPoolAddressesProvider(
-            // 0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5 //MAINNET
-            0x88757f2f99175387aB4C6a4b3067c77A695b0349 //KOVAN
+            0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5 //MAINNET
+            // 0x88757f2f99175387aB4C6a4b3067c77A695b0349 //KOVAN
         );
 
     function _ethToWeth(
@@ -92,19 +93,26 @@ contract Aave {
 
     function ERCdeposit(address tokenaddr, uint256 amt) external payable {
         console.log(address(this));
+        console.log(msg.sender);
         IAave aave = IAave(provider.getLendingPool());
-        IERC20 token = IERC20(tokenaddr);
+        // Itoken token = Itoken(tokenaddr);
+        Itoken token = Itoken(tokenaddr);
+        // IERC20 dai = IERC20(0xfC1E690f61EFd961294b3e1Ce3313fBD8aa4f85d);
         require(token.balanceOf(msg.sender) >= amt, "Insufficent funds");
         console.log(token.balanceOf(msg.sender));
         console.log(msg.sender);
-        token.approve(address(this), amt);
-        console.log(token.allowance(msg.sender, address(this)));
-        token.transfer(address(this), amt);
+        // // token.approve(address(this), amt);
+        // console.log("Allowance", token.allowance(msg.sender, address(this)));
+        token.transferFrom(msg.sender, address(this), amt);
+        // token.transfer(address(this), amt);
+        // amt = 1000000000;
         console.log(token.balanceOf(address(this)));
         token.approve(address(aave), amt);
-        console.log("here1");
+        // console.log(token.allowance(address(this), address(aave)));
+        // console.log("here1");
+        // console.log("aDai Bal", dai.balanceOf(address(this)));
         aave.deposit(tokenaddr, amt, address(this), 0);
-        console.log("here2");
+        // console.log("here2");
     }
 
     function deposit(address tokenaddr, uint256 amt) external payable {
@@ -137,7 +145,9 @@ contract Aave {
         aave.deposit(tokenaddr, amt, address(this), 0);
         // aave.deposit(tokenaddr, amt, msg.sender, 0);
         console.log("After deposit to aave", token.balanceOf(address(this)));
-        console.log("ETH bal", msg.sender.balance);
+        console.log("ETH bal", msg.sender.balance / (10**18));
+        // Itoken aweth = Itoken(aWeth);
+        // console.log(aweth.balanceOf(address(this)));
     }
 
     function withdraw() external payable {
@@ -157,16 +167,25 @@ contract Aave {
         // return token.balanceOf(address(this));
     }
 
-    function borrow() external payable {
+    function borrow(address addr, uint256 amt) external payable {
         address tokenaddr = weth;
         uint256 amt = msg.value;
         Itoken token = Itoken(tokenaddr);
+        console.log(amt, tokenaddr);
+        // console.log(address(this).balance);
+        // console.log("here");
+        // Itoken aweth = Itoken(aWeth);
+        // console.log(aweth.balanceOf(address(this)));
         IAave aave = IAave(provider.getLendingPool());
-        aave.borrow(tokenaddr, amt, 1, 0, address(this));
         console.log("Borrow", token.balanceOf(address(this)));
+        // aave.approveDelegation(address delegatee, uint256 amount)
+        aave.borrow(tokenaddr, amt, 1, 0, address(this));
+        console.log("Here2");
         _wethToEth(token, amt, address(token));
         address payable owner = payable(msg.sender);
         owner.transfer(address(this).balance);
+        // token.approve(address(token), amt);
+        // token.withdraw(amt);
         console.log("ETH bal", msg.sender.balance);
         console.log("ETH bal of sender", msg.sender.balance);
         console.log("ETH bal of contact", address(this).balance);
@@ -180,7 +199,10 @@ contract Aave {
 
         _ethToWeth(token, amt, address(aave));
 
-        console.log("Before Payback", token.balanceOf(address(this)));
+        console.log(
+            "Before Payback",
+            token.balanceOf(address(this)) / (10**18)
+        );
         aave.repay(tokenaddr, amt, 1, address(this));
         console.log("After Payback", token.balanceOf(address(this)));
     }
