@@ -56,7 +56,7 @@ describe("Aio Contract", function () {
       let bal = await contract.connect(owner).balanceOf(owner.address);
       console.log(bal);
     }).timeout(500000);
-    it("Check Borrow DAI", async function () {
+    it.only("Check Borrow DAI", async function () {
       const amt = ethers.utils.parseEther("0.000001");
 
       const provider = ethers.provider;
@@ -85,7 +85,9 @@ describe("Aio Contract", function () {
       });
       await contract.connect(owner).approve(contractAddr.address, amt);
       await aioToken.ERCdeposit(dai, amt);
-      await aioToken.ERCborrow(dai, ethers.utils.parseEther("0.000000000001"));
+      const usdc = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
+      // await aioToken.ERCborrow(usdc, amt / 100000);
+      await aioToken.ERCborrow(usdc, 1);
       bal = await contract.connect(owner).balanceOf(owner.address);
       console.log(bal);
     }).timeout(500000);

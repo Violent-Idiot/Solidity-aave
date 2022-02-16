@@ -58,6 +58,28 @@ interface Itoken {
     function decimals() external view returns (uint256);
 }
 
+interface IProtocolDataProvider {
+    struct TokenData {
+        string symbol;
+        address tokenAddress;
+    }
+
+    function getUserReserveData(address asset, address user)
+        external
+        view
+        returns (
+            uint256 currentATokenBalance,
+            uint256 currentStableDebt,
+            uint256 currentVariableDebt,
+            uint256 principalStableDebt,
+            uint256 scaledVariableDebt,
+            uint256 stableBorrowRate,
+            uint256 liquidityRate,
+            uint40 stableRateLastUpdated,
+            bool usageAsCollateralEnabled
+        );
+}
+
 interface LendingPoolAddressesProvider {
     function getLendingPool() external returns (address);
 }
@@ -67,7 +89,7 @@ contract Aave {
 
     address weth = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2; //MAINNET
     address aWeth = 0x030bA81f1c18d280636F32af80b9AAd02Cf0854e;
-    address adai = 0xfC1E690f61EFd961294b3e1Ce3313fBD8aa4f85d;
+    address adai = 0x028171bCA77440897B824Ca71D1c56caC55b68A3;
     // address weth = 0xd0A1E359811322d97991E03f863a0C30C2cF029C; //KOVAN
     address eth = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
@@ -76,6 +98,8 @@ contract Aave {
             0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5 //MAINNET
             // 0x88757f2f99175387aB4C6a4b3067c77A695b0349 //KOVAN
         );
+    IProtocolDataProvider userData =
+        IProtocolDataProvider(0x057835Ad21a177dbdd3090bB1CAE03EaCF78Fc6d);
 
     function _ethToWeth(
         Itoken token,
@@ -99,26 +123,23 @@ contract Aave {
         console.log(address(this));
         console.log(msg.sender);
         IAave aave = IAave(provider.getLendingPool());
-        // Itoken token = Itoken(tokenaddr);
         Itoken token = Itoken(tokenaddr);
-        // IERC20 dai = IERC20(0xfC1E690f61EFd961294b3e1Ce3313fBD8aa4f85d);
         require(token.balanceOf(msg.sender) >= amt, "Insufficent funds");
         console.log(token.balanceOf(msg.sender));
         console.log(msg.sender);
-        // // token.approve(address(this), amt);
-        // console.log("Allowance", token.allowance(msg.sender, address(this)));
         token.transferFrom(msg.sender, address(this), amt);
-        // token.transfer(address(this), amt);
-        // amt = 1000000000;
-        console.log(token.balanceOf(address(this)));
         token.approve(address(aave), amt);
-        // console.log(token.allowance(address(this), address(aave)));
-        // console.log("here1");
-        // console.log("aDai Bal", dai.balanceOf(address(this)));
         aave.deposit(tokenaddr, amt, address(this), 0);
+        uint256 bal;
+        bool col;
+        (bal, , , , , , , , col) = userData.getUserReserveData(
+            tokenaddr,
+            address(this)
+        );
+        console.log(bal, col);
         Itoken adaiToken = Itoken(adai);
-        console.log("Deposit", adaiToken.balanceOf(address(this)));
-        // console.log("here2");
+        console.log("adai token", adaiToken.balanceOf(address(this)));
+        console.log("after deposit", token.balanceOf(address(this)));
     }
 
     function deposit(address tokenaddr, uint256 amt) external payable {
@@ -149,6 +170,7 @@ contract Aave {
         }
         console.log("After deposit to weth", token.balanceOf(address(this)));
         aave.deposit(tokenaddr, amt, address(this), 0);
+        aave.setUserUseReserveAsCollateral(tokenaddr, true);
         // aave.deposit(tokenaddr, amt, msg.sender, 0);
         console.log("After deposit to aave", token.balanceOf(address(this)));
         console.log("ETH bal", msg.sender.balance / (10**18));
@@ -173,8 +195,9 @@ contract Aave {
         Itoken token = Itoken(tokenaddr);
         Itoken adaiToken = Itoken(adai);
         IAave aave = IAave(provider.getLendingPool());
-        console.log("adai bal borrow", token.balanceOf(address(this)));
-        // aave.setUserUseReserveAsCollateral(adai, true);
+        console.log("adai bal borrow", adaiToken.balanceOf(address(this)));
+        console.log("amt", amt);
+
         console.log("Borrow", token.balanceOf(address(this)));
         aave.borrow(tokenaddr, amt, 1, 0, address(this));
         token.transferFrom(address(this), msg.sender, amt);
