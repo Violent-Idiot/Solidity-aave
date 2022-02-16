@@ -47,6 +47,48 @@ describe("Aio Contract", function () {
       await contract.connect(owner).approve(contractAddr.address, amt);
       await aioToken.ERCdeposit(dai, amt);
     }).timeout(500000);
+    it("Check withdrawal DAI", async function () {
+      const amt = ethers.utils.parseEther("0.000001");
+      const provider = ethers.provider;
+      const contract = new ethers.Contract(dai, abi.result, provider);
+      const [owner] = await ethers.getSigners();
+      await aioToken.ERCwithdraw(dai, amt);
+      let bal = await contract.connect(owner).balanceOf(owner.address);
+      console.log(bal);
+    }).timeout(500000);
+    it("Check Borrow DAI", async function () {
+      const amt = ethers.utils.parseEther("0.000001");
+
+      const provider = ethers.provider;
+
+      const contract = new ethers.Contract(dai, abi.result, provider);
+      const [owner] = await ethers.getSigners();
+      await network.provider.send("hardhat_setBalance", [
+        account,
+        ethers.utils.parseEther("10.0").toHexString(),
+      ]);
+      await hre.network.provider.request({
+        method: "hardhat_impersonateAccount",
+        params: [account],
+      });
+      const myAcc = await ethers.getSigner(account);
+      // let bal = await provider.getBalance(account);
+      // console.log(ethers.utils.formatEther(bal));
+      let bal = await contract.connect(myAcc).balanceOf(account);
+      console.log(ethers.utils.formatEther(bal));
+      await contract.connect(myAcc).transfer(owner.address, amt);
+      bal = await contract.connect(owner).balanceOf(owner.address);
+      console.log(ethers.utils.formatEther(bal));
+      await hre.network.provider.request({
+        method: "hardhat_stopImpersonatingAccount",
+        params: [account],
+      });
+      await contract.connect(owner).approve(contractAddr.address, amt);
+      await aioToken.ERCdeposit(dai, amt);
+      await aioToken.ERCborrow(dai, ethers.utils.parseEther("0.000000000001"));
+      bal = await contract.connect(owner).balanceOf(owner.address);
+      console.log(bal);
+    }).timeout(500000);
 
     it("Check deposit", async function () {
       const token = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";

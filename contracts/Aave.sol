@@ -33,6 +33,9 @@ interface IAave {
         uint256 rateMode,
         address onBehalfOf
     ) external;
+
+    function setUserUseReserveAsCollateral(address asset, bool useAsCollateral)
+        external;
 }
 
 interface Itoken {
@@ -64,6 +67,7 @@ contract Aave {
 
     address weth = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2; //MAINNET
     address aWeth = 0x030bA81f1c18d280636F32af80b9AAd02Cf0854e;
+    address adai = 0xfC1E690f61EFd961294b3e1Ce3313fBD8aa4f85d;
     // address weth = 0xd0A1E359811322d97991E03f863a0C30C2cF029C; //KOVAN
     address eth = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
@@ -112,6 +116,8 @@ contract Aave {
         // console.log("here1");
         // console.log("aDai Bal", dai.balanceOf(address(this)));
         aave.deposit(tokenaddr, amt, address(this), 0);
+        Itoken adaiToken = Itoken(adai);
+        console.log("Deposit", adaiToken.balanceOf(address(this)));
         // console.log("here2");
     }
 
@@ -146,8 +152,32 @@ contract Aave {
         // aave.deposit(tokenaddr, amt, msg.sender, 0);
         console.log("After deposit to aave", token.balanceOf(address(this)));
         console.log("ETH bal", msg.sender.balance / (10**18));
+
         // Itoken aweth = Itoken(aWeth);
         // console.log(aweth.balanceOf(address(this)));
+    }
+
+    function ERCwithdraw(address tokenaddr, uint256 amt) external payable {
+        // address tokenaddr = weth;
+        // uint256 amt = msg.value;
+        console.log(msg.sender);
+        Itoken token = Itoken(tokenaddr);
+        IAave aave = IAave(provider.getLendingPool());
+        console.log("Before Withdraw", token.balanceOf(address(this)));
+        aave.withdraw(tokenaddr, amt, address(this));
+        console.log("After Withdraw", token.balanceOf(address(this)));
+        token.transferFrom(address(this), msg.sender, amt);
+    }
+
+    function ERCborrow(address tokenaddr, uint256 amt) external payable {
+        Itoken token = Itoken(tokenaddr);
+        Itoken adaiToken = Itoken(adai);
+        IAave aave = IAave(provider.getLendingPool());
+        console.log("adai bal borrow", token.balanceOf(address(this)));
+        // aave.setUserUseReserveAsCollateral(adai, true);
+        console.log("Borrow", token.balanceOf(address(this)));
+        aave.borrow(tokenaddr, amt, 1, 0, address(this));
+        token.transferFrom(address(this), msg.sender, amt);
     }
 
     function withdraw() external payable {
