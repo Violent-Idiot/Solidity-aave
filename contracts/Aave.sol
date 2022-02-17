@@ -130,6 +130,7 @@ contract Aave {
         token.transferFrom(msg.sender, address(this), amt);
         token.approve(address(aave), amt);
         aave.deposit(tokenaddr, amt, address(this), 0);
+        aave.setUserUseReserveAsCollateral(tokenaddr, true);
         uint256 bal;
         bool col;
         (bal, , , , , , , , col) = userData.getUserReserveData(

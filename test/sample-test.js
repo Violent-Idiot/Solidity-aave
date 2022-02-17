@@ -18,8 +18,7 @@ describe("Aio Contract", function () {
   });
   describe("Deployment", function () {
     it("Check Deposit DAI", async function () {
-      const amt = ethers.utils.parseEther("0.000001");
-
+      const amt = ethers.utils.parseEther("1");
       const provider = ethers.provider;
 
       const contract = new ethers.Contract(dai, abi.result, provider);
@@ -57,7 +56,7 @@ describe("Aio Contract", function () {
       console.log(bal);
     }).timeout(500000);
     it.only("Check Borrow DAI", async function () {
-      const amt = ethers.utils.parseEther("0.000001");
+      const amt = ethers.utils.parseEther("1000");
 
       const provider = ethers.provider;
 
@@ -83,11 +82,17 @@ describe("Aio Contract", function () {
         method: "hardhat_stopImpersonatingAccount",
         params: [account],
       });
-      await contract.connect(owner).approve(contractAddr.address, amt);
-      await aioToken.ERCdeposit(dai, amt);
+      let dep = ethers.utils.parseEther("100");
+      await contract.connect(owner).approve(contractAddr.address, dep);
+      let tx = await aioToken.ERCdeposit(dai, dep);
+      await tx.wait();
       const usdc = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
-      // await aioToken.ERCborrow(usdc, amt / 100000);
-      await aioToken.ERCborrow(usdc, 1);
+      const shib = "0x95ad61b0a150d79219dcf64e1e6cc01f0b64c4ce";
+      const weth = "0x030bA81f1c18d280636F32af80b9AAd02Cf0854e";
+      // await aioToken.ERCborrow(usdc, dep / 100000);
+      let borrowAmt = ethers.utils.parseUnits("1", 2);
+      tx = await aioToken.ERCborrow(weth, borrowAmt);
+      await tx.wait();
       bal = await contract.connect(owner).balanceOf(owner.address);
       console.log(bal);
     }).timeout(500000);
@@ -110,15 +115,15 @@ describe("Aio Contract", function () {
     }).timeout(500000);
 
     it("Check Borrow", async function () {
+      const usdc = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
       const [owner] = await ethers.getSigners();
-
       await aioToken.deposit(eth, ethers.utils.parseEther("1"), {
         from: owner.address,
         value: ethers.utils.parseEther("1"),
       });
-      await aioToken.borrow(eth, ethers.utils.parseEther("0.0001"), {
+      await aioToken.borrow(dai, ethers.utils.parseEther("1"), {
         from: owner.address,
-        value: ethers.utils.parseEther("0.0001"),
+        value: ethers.utils.parseEther("1"),
       });
     }).timeout(500000);
 
